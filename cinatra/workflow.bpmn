@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:cinatra="http://cinatra.ai/schema/bpmn/profile-1.0"
+  id="major-release-defs"
+  targetNamespace="http://cinatra.ai/schema/bpmn/profile-1.0">
+  <bpmn:process id="major-release" name="Major Release" isExecutable="false">
+    <bpmn:documentation>AI-assisted multi-week product launch: content drafts, legal sign-off, announce.</bpmn:documentation>
+    <bpmn:extensionElements>
+      <cinatra:workflowMeta name="{{product}} — Major Release" product="{{product}}" />
+      <cinatra:placeholders>
+        <cinatra:placeholder name="product" type="string" required="true" />
+      </cinatra:placeholders>
+    </bpmn:extensionElements>
+
+    <bpmn:startEvent id="start" name="Start" />
+
+    <bpmn:userTask id="kickoff" name="Release kickoff">
+      <bpmn:extensionElements>
+        <cinatra:taskKind value="checkpoint" />
+        <cinatra:taskSchedule mode="relative" anchor="target" offsetIso8601="P14D" direction="before" />
+      </bpmn:extensionElements>
+    </bpmn:userTask>
+
+    <bpmn:serviceTask id="blog" name="Draft launch blog for {{product}}">
+      <bpmn:extensionElements>
+        <cinatra:agentRef package="@cinatra-ai/blog-pipeline-agent" />
+        <cinatra:taskInput>{"brief":"{{product}} launch"}</cinatra:taskInput>
+        <cinatra:taskSchedule mode="relative" anchor="target" offsetIso8601="P7D" direction="before" localTime="09:00" />
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:userTask id="legal" name="Legal sign-off">
+      <bpmn:extensionElements>
+        <cinatra:taskKind value="approval" />
+        <cinatra:approvalConfig level="organization" rejectionPolicy="needs_revision" />
+        <cinatra:taskSchedule mode="relative" anchor="target" offsetIso8601="P3D" direction="before" />
+      </bpmn:extensionElements>
+    </bpmn:userTask>
+
+    <bpmn:sendTask id="announce" name="Announce {{product}} is live">
+      <bpmn:extensionElements>
+        <cinatra:messageBody>{{product}} has shipped.</cinatra:messageBody>
+        <cinatra:taskSchedule mode="relative" anchor="target" offsetIso8601="PT1H" direction="after" />
+      </bpmn:extensionElements>
+    </bpmn:sendTask>
+
+    <bpmn:endEvent id="end" name="End" />
+
+    <bpmn:sequenceFlow id="flow_start_kickoff" sourceRef="start" targetRef="kickoff" />
+    <bpmn:sequenceFlow id="flow_kickoff_blog" sourceRef="kickoff" targetRef="blog" />
+    <bpmn:sequenceFlow id="flow_blog_legal" sourceRef="blog" targetRef="legal">
+      <bpmn:extensionElements>
+        <cinatra:transitionOutcome outcome="success" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_legal_announce" sourceRef="legal" targetRef="announce">
+      <bpmn:extensionElements>
+        <cinatra:transitionOutcome outcome="success" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="flow_announce_end" sourceRef="announce" targetRef="end" />
+  </bpmn:process>
+</bpmn:definitions>
