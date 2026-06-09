@@ -1,0 +1,26 @@
+# Dependencies (no committed lockfile — CI installs with --no-frozen-lockfile)
+node_modules/
+pnpm-lock.yaml
+
+# Build output (tsconfig outDir)
+dist/
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# npm pack output
+*.tgz
+
+# Debug logs
+*.log
+
+# Env files & secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
