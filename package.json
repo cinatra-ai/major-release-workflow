@@ -12,7 +12,18 @@
   "cinatra": {
     "apiVersion": "cinatra.ai/v1",
     "kind": "workflow",
-    "dependencies": [],
+    "dependencies": [
+      {
+        "packageName": "@cinatra-ai/blog-pipeline-agent",
+        "edgeType": "runtime",
+        "versionConstraint": {
+          "kind": "exact",
+          "version": "0.1.1"
+        },
+        "requirement": "required",
+        "kind": "agent"
+      }
+    ],
     "workflowVersion": 1
   }
 }
